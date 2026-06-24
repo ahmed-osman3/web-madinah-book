@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="description" content="Free, offline app for learning and practicing Madinah Book 1 Arabic with spaced repetition." />
+  <title>Madinah Book 1 · Learn Arabic</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <span class="brand-mark">ﻡ</span>
+      <span class="brand-text">Madinah <span class="brand-book">Book 1</span></span>
+    </a>
+    <nav class="topnav">
+      <a class="nav-link" data-route="#/" href="#/">Home</a>
+      <a class="nav-link" data-route="#/lessons" href="#/lessons">Lessons</a>
+      <a class="nav-link" data-route="#/review" href="#/review">Review</a>
+      <a class="nav-link" data-route="#/stats" href="#/stats">Progress</a>
+      <a class="nav-link" data-route="#/settings" href="#/settings">Settings</a>
+    </nav>
+  </header>
+
+  <main id="app" class="container"></main>
+
+  <nav class="bottomnav">
+    <a class="nav-link" data-route="#/" href="#/"><span class="bn-icon">🏠</span><span>Home</span></a>
+    <a class="nav-link" data-route="#/lessons" href="#/lessons"><span class="bn-icon">📚</span><span>Lessons</span></a>
+    <a class="nav-link" data-route="#/review" href="#/review"><span class="bn-icon">🔁</span><span>Review</span></a>
+    <a class="nav-link" data-route="#/stats" href="#/stats"><span class="bn-icon">📊</span><span>Progress</span></a>
+    <a class="nav-link" data-route="#/settings" href="#/settings"><span class="bn-icon">⚙️</span><span>More</span></a>
+  </nav>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

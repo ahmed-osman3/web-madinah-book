@@ -17,11 +17,16 @@ const DEFAULT_STATE = {
     lastStudyDate: null,   // 'YYYY-MM-DD'
     reviewsByDay: {},      // { 'YYYY-MM-DD': count }
     totalReviews: 0,
+    xp: 0,                 // total experience points earned
+    xpByDay: {},           // { 'YYYY-MM-DD': xp }
+    newByDay: {},          // { 'YYYY-MM-DD': new cards introduced }
   },
   settings: {
     newCardsPerDay: 15,
     showTransliteration: true,
     theme: 'auto',
+    dailyGoal: 30,         // XP target per day
+    useHearts: true,       // Duolingo-style hearts during lessons
   },
 };
 

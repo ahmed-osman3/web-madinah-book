@@ -14,8 +14,15 @@ browser. Your progress is saved in `localStorage`; nothing is sent anywhere.
 
 - 📚 **All 23 lessons of Book 1** — each with a concise grammar explanation and
   its full vocabulary list (Arabic with full ḥarakāt, transliteration, English).
+  Lesson topics mirror the free [Madinah Arabic Language Course](https://www.madinaharabic.com/arabic-language-course/lessons/).
+- 🎮 **Duolingo-style lessons** — each lesson *teaches* the grammar and new
+  words, then drills them with interactive exercises (multiple-choice both
+  directions, type-the-translation, and tap-the-pairs matching). Earn **XP**,
+  keep **hearts**, get instant ✓/✗ feedback, and finish with a celebration
+  screen and **daily-goal** progress.
 - 🔁 **Spaced repetition** — a built-in SM-2 scheduler (the algorithm behind
   Anki) introduces new words gradually and reviews them at expanding intervals.
+  Answering exercises automatically feeds each word into the review schedule.
 - 🌱 **Daily new-card limit** so you build vocabulary at a steady, sustainable pace.
 - 🔥 **Streaks & progress** — daily review streak, a 14-day activity chart, and
   per-lesson mastery bars.
@@ -58,9 +65,10 @@ the app works as-is with no configuration.
 
 ```
 index.html          App shell + navigation
-css/styles.css      Styling (light/dark, responsive)
+css/styles.css      Styling (light/dark, responsive, Duolingo-style player)
 js/
-  app.js            UI, routing, and the study-session controller
+  app.js            UI, routing, study sessions, and the lesson player
+  exercises.js      Builds the teach-then-practice exercise sequence
   srs.js            SM-2 spaced-repetition scheduling
   storage.js        localStorage persistence (load/save/export/import)
   content.js        Derives flashcards from the course content

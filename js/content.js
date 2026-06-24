@@ -45,3 +45,12 @@ export function lessonCards(bookNum, lessonNum) {
     ...word,
   }));
 }
+
+// The freely-distributed Book 1 lesson recordings (Dr. V. Abdur Rahim) hosted
+// on the Internet Archive. Files follow MAA_BK1_VAR_L01.mp3 … _L23.mp3.
+export const LESSON_AUDIO_BASE =
+  'https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L';
+
+export function lessonAudioUrl(lessonNum) {
+  return `${LESSON_AUDIO_BASE}${String(lessonNum).padStart(2, '0')}.mp3`;
+}

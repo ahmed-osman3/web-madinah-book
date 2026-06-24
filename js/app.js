@@ -21,6 +21,7 @@ import {
   getLesson,
   allCards,
   lessonCards,
+  lessonAudioUrl,
 } from './content.js';
 import { buildLessonSteps, answerMatches } from './exercises.js';
 import { speak, canSpeak } from './audio.js';
@@ -56,6 +57,29 @@ function el(tag, attrs = {}, ...children) {
 
 function cardRecord(id) {
   return getState().srs[id] || null;
+}
+
+// Full lesson recording player (the original Book 1 audio on archive.org).
+// Falls back gracefully — if the file can't load, the on-device word audio
+// still works, so we just show a small note.
+function lessonAudioPanel(lessonNum, { compact = false } = {}) {
+  const url = lessonAudioUrl(lessonNum);
+  const note = el('div', { class: 'muted small audio-note' });
+  const audio = el('audio', { class: 'lesson-audio', controls: '', preload: 'none' },
+    el('source', { src: url, type: 'audio/mpeg' }));
+  audio.addEventListener('error', () => {
+    note.textContent = '⚠️ Recording could not be loaded here — tap "open ↗", or use the 🔊 buttons for per-word audio.';
+  }, true);
+  return el('div', { class: 'card panel audio-panel' + (compact ? ' compact' : '') },
+    el('div', { class: 'panel-head' },
+      el('h2', {}, '🎧 Lesson recording'),
+      el('a', { class: 'muted small', href: url, target: '_blank', rel: 'noopener' }, 'open ↗'),
+    ),
+    compact ? null : el('p', { class: 'muted small' },
+      'The original Book 1 audio (Dr. V. Abdur Rahim) for this lesson, from the Internet Archive.'),
+    audio,
+    note,
+  );
 }
 
 // A small speaker button that pronounces the given Arabic text.
@@ -367,6 +391,7 @@ function renderLessonDetail(parts) {
         onClick: () => navigate(`#/learn/${num}`),
       }, done ? '↻ Practice again' : '▶ Start lesson'),
     ),
+    lessonAudioPanel(num),
     el('div', { class: 'card panel' },
       el('h2', {}, 'Grammar'),
       el('p', { class: 'grammar ar-inline', dir: 'auto' }, lesson.grammar),
@@ -719,6 +744,7 @@ function grammarBody(step) {
       el('h2', {}, '📘 Grammar'),
       el('p', { class: 'grammar', dir: 'auto' }, step.lesson.grammar),
     ),
+    lessonAudioPanel(step.lesson.number, { compact: true }),
     el('p', { class: 'muted small center' }, "You'll learn these words next:"),
     preview,
   );
@@ -1224,6 +1250,9 @@ function resourcesPanel() {
       link('https://abdurrahman.org/arabic-learning/madina-arabic/',
         'abdurrahman.org — Madinah Arabic',
         'Free Book 1–3 PDFs, lesson audio (mp3), solutions and study notes.'),
+      link('https://archive.org/details/MAA_BK1_VAR',
+        'Book 1 lesson recordings (Internet Archive)',
+        'The original audio recordings used in each lesson here, by Dr. V. Abdur Rahim.'),
     ),
   );
 }

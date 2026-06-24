@@ -20,6 +20,10 @@ browser. Your progress is saved in `localStorage`; nothing is sent anywhere.
   directions, type-the-translation, and tap-the-pairs matching). Earn **XP**,
   keep **hearts**, get instant ✓/✗ feedback, and finish with a celebration
   screen and **daily-goal** progress.
+- 🎧 **Audio** — the original Book 1 lesson recordings (Dr. V. Abdur Rahim, via
+  the Internet Archive) play right inside each lesson, and every individual word
+  has on-device pronunciation (Web Speech API) — so all vocabulary is voiced,
+  even offline.
 - 🔁 **Spaced repetition** — a built-in SM-2 scheduler (the algorithm behind
   Anki) introduces new words gradually and reviews them at expanding intervals.
   Answering exercises automatically feeds each word into the review schedule.

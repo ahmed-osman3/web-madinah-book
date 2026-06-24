@@ -569,3 +569,35 @@ input[type='number'].input { width: 90px; text-align: center; }
   .choice-grid { grid-template-columns: 1fr; }
   .learn { min-height: 70vh; }
 }
+
+/* ================================================================== */
+/* Audio (speaker buttons) + source resource links                    */
+/* ================================================================== */
+
+.speak-btn {
+  appearance: none; border: 1px solid var(--border); background: var(--surface);
+  color: var(--primary); cursor: pointer; border-radius: 999px;
+  width: 34px; height: 34px; flex-shrink: 0; font-size: 15px; line-height: 1;
+  display: inline-grid; place-items: center; transition: background 0.12s, transform 0.05s;
+}
+.speak-btn:hover { background: var(--surface-2); }
+.speak-btn:active { transform: scale(0.92); }
+.speak-btn.speak-lg { width: 44px; height: 44px; font-size: 20px; margin: 10px auto 0; }
+
+.vocab-ar-wrap { display: flex; align-items: center; gap: 10px; }
+.vocab-speak { width: 30px; height: 30px; font-size: 13px; }
+.intro-ar-row { display: flex; justify-content: center; }
+
+/* center the speaker under exercise prompts / flashcards */
+.q-card .speak-btn { margin: 12px auto 0; display: flex; }
+.flashcard-front .speak-btn { margin-top: 14px; }
+
+/* Source material links */
+.resource-list { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.resource {
+  display: block; padding: 14px 16px; border: 1px solid var(--border);
+  border-radius: 12px; background: var(--surface); transition: border-color 0.12s, background 0.12s;
+}
+.resource:hover { border-color: var(--teal-500); background: var(--surface-2); }
+.resource-title { font-weight: 700; color: var(--text); }
+.resource-ext { color: var(--muted); font-weight: 600; }

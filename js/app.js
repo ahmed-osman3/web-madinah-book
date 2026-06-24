@@ -23,6 +23,7 @@ import {
   lessonCards,
 } from './content.js';
 import { buildLessonSteps, answerMatches } from './exercises.js';
+import { speak, canSpeak } from './audio.js';
 
 const BOOK_NUM = 1;
 const app = document.getElementById('app');
@@ -55,6 +56,17 @@ function el(tag, attrs = {}, ...children) {
 
 function cardRecord(id) {
   return getState().srs[id] || null;
+}
+
+// A small speaker button that pronounces the given Arabic text.
+function speakButton(text, extraClass = '') {
+  if (!canSpeak()) return null;
+  return el('button', {
+    class: 'speak-btn ' + extraClass,
+    title: 'Listen',
+    'aria-label': 'Listen to pronunciation',
+    onClick: (e) => { e.stopPropagation(); speak(text); },
+  }, '🔊');
 }
 
 // Categorise the whole deck relative to today.
@@ -393,7 +405,10 @@ function vocabTable(lesson, showTranslit) {
     const state = isNew(rec) ? 'new' : isDue(rec) ? 'due' : 'learned';
     list.append(
       el('div', { class: 'vocab-row' },
-        el('div', { class: 'vocab-ar ar', dir: 'rtl' }, w.ar),
+        el('div', { class: 'vocab-ar-wrap' },
+          speakButton(w.ar, 'vocab-speak'),
+          el('div', { class: 'vocab-ar ar', dir: 'rtl' }, w.ar),
+        ),
         el('div', { class: 'vocab-mid' },
           showTranslit ? el('div', { class: 'vocab-translit' }, w.translit) : null,
           el('div', { class: 'vocab-en' }, w.en),
@@ -503,6 +518,7 @@ function renderCard() {
   const front = el('div', { class: 'flashcard-face flashcard-front' },
     isNewCard ? el('span', { class: 'chip chip-new card-flag' }, 'new') : null,
     el('div', { class: 'flash-ar ar', dir: 'rtl' }, card.ar),
+    speakButton(card.ar, 'speak-lg'),
   );
 
   const back = el('div', { class: 'flashcard-back' + (s.revealed ? '' : ' hidden') },
@@ -711,9 +727,13 @@ function grammarBody(step) {
 function introBody(step) {
   const w = step.word;
   const showTranslit = getState().settings.showTransliteration;
+  if (getState().settings.autoAudio) setTimeout(() => speak(w.ar), 180);
   return el('div', { class: 'teach center' },
     el('div', { class: 'teach-tag' }, 'New word'),
-    el('div', { class: 'intro-ar ar', dir: 'rtl' }, w.ar),
+    el('div', { class: 'intro-ar-row' },
+      el('div', { class: 'intro-ar ar', dir: 'rtl' }, w.ar),
+    ),
+    speakButton(w.ar, 'speak-lg'),
     showTranslit ? el('div', { class: 'intro-translit' }, w.translit) : null,
     el('div', { class: 'intro-arrow' }, '↓'),
     el('div', { class: 'intro-en' }, w.en),
@@ -758,7 +778,10 @@ function chooseBody(step, answerLang) {
 
   return el('div', { class: 'q' },
     el('h2', { class: 'q-prompt' }, prompt),
-    el('div', { class: 'q-card' }, promptWord, translit),
+    el('div', { class: 'q-card' },
+      promptWord,
+      answerLang === 'en' ? speakButton(w.ar) : null,
+      translit),
     grid,
   );
 }
@@ -782,6 +805,7 @@ function typeBody(step) {
     el('h2', { class: 'q-prompt' }, 'Translate to English'),
     el('div', { class: 'q-card' },
       el('div', { class: 'q-word ar', dir: 'rtl' }, w.ar),
+      speakButton(w.ar),
       getState().settings.showTransliteration ? el('div', { class: 'q-translit' }, w.translit) : null,
     ),
     input,
@@ -1149,15 +1173,27 @@ function renderSettings() {
     update((s) => { s.settings.useHearts = heartsToggle.checked; });
   });
 
+  const audioToggle = el('input', { type: 'checkbox', class: 'toggle' });
+  audioToggle.checked = settings.autoAudio;
+  audioToggle.addEventListener('change', () => {
+    update((s) => { s.settings.autoAudio = audioToggle.checked; });
+  });
+
+  const studyRows = [
+    settingRow('Daily XP goal', 'Experience points to aim for each day.', dailyGoal),
+    settingRow('New cards per day', 'How many new words to introduce in flashcard review.', newPerDay),
+    settingRow('Hearts in lessons', 'Lose a heart on a wrong answer (Duolingo style). Off = relaxed.', heartsToggle),
+    settingRow('Show transliteration', 'Display Latin-script pronunciation.', translitToggle),
+    settingRow('Theme', 'Appearance of the app.', themeSelect),
+  ];
+  if (canSpeak()) {
+    studyRows.splice(3, 0, settingRow('Auto-play audio',
+      'Pronounce each new word automatically during lessons.', audioToggle));
+  }
+
   app.append(
-    el('div', { class: 'card panel' },
-      el('h2', {}, 'Study'),
-      settingRow('Daily XP goal', 'Experience points to aim for each day.', dailyGoal),
-      settingRow('New cards per day', 'How many new words to introduce in flashcard review.', newPerDay),
-      settingRow('Hearts in lessons', 'Lose a heart on a wrong answer (Duolingo style). Off = relaxed.', heartsToggle),
-      settingRow('Show transliteration', 'Display Latin-script pronunciation.', translitToggle),
-      settingRow('Theme', 'Appearance of the app.', themeSelect),
-    ),
+    el('div', { class: 'card panel' }, el('h2', {}, 'Study'), ...studyRows),
+    resourcesPanel(),
     el('div', { class: 'card panel' },
       el('h2', {}, 'Data'),
       el('p', { class: 'muted small' }, 'All your progress is stored locally in this browser. Back it up here.'),
@@ -1166,6 +1202,28 @@ function renderSettings() {
         el('button', { class: 'btn btn-secondary', onClick: doImport }, '⬆ Import backup'),
         el('button', { class: 'btn btn-danger', onClick: doReset }, '🗑 Reset all progress'),
       ),
+    ),
+  );
+}
+
+// Links to the original free source materials (lessons, audio, PDFs).
+function resourcesPanel() {
+  const link = (href, title, desc) =>
+    el('a', { class: 'resource', href, target: '_blank', rel: 'noopener' },
+      el('div', { class: 'resource-title' }, title, el('span', { class: 'resource-ext' }, ' ↗')),
+      el('div', { class: 'muted small' }, desc),
+    );
+  return el('div', { class: 'card panel' },
+    el('h2', {}, 'Source materials'),
+    el('p', { class: 'muted small' },
+      'This app teaches the freely-distributed Madinah Arabic course. For the original lessons, recorded audio, and printable PDFs, open these:'),
+    el('div', { class: 'resource-list' },
+      link('https://www.madinaharabic.com/arabic-language-course/lessons/',
+        'Madinah Arabic — Language Course',
+        'The original interactive lessons with recorded audio and exercises.'),
+      link('https://abdurrahman.org/arabic-learning/madina-arabic/',
+        'abdurrahman.org — Madinah Arabic',
+        'Free Book 1–3 PDFs, lesson audio (mp3), solutions and study notes.'),
     ),
   );
 }

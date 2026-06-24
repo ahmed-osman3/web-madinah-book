@@ -27,6 +27,7 @@ const DEFAULT_STATE = {
     theme: 'auto',
     dailyGoal: 30,         // XP target per day
     useHearts: true,       // Duolingo-style hearts during lessons
+    autoAudio: true,       // auto-pronounce new words in lessons
   },
 };
 

@@ -14,6 +14,34 @@ export const BOOK1 = {
       titleEnglish: 'Demonstrative for the near: هَذَا (this)',
       grammar:
         'This lesson introduces the demonstrative pronoun هَذَا ("this"), used to point to a singular masculine thing that is near. A basic equational sentence is formed simply by placing هَذَا before an indefinite noun, e.g. هَذَا بَيْتٌ ("this is a house") — Arabic has no separate word for "is". The indefinite noun ends in tanwīn (ـٌ, the "-un" ending), which signals that it is indefinite and in the nominative case. The lesson also introduces the question word مَا ("what?") for non-rational things.',
+      sections: [
+        {
+          heading: 'Pointing with هَذَا',
+          body: 'هَذَا means "this" and points to a single masculine thing that is near you. Arabic has no word for "is", so you simply put هَذَا in front of a noun: هَذَا بَيْتٌ literally reads "this house" but means "this is a house". The "-un" ending you hear on the noun (the tanwīn, ـٌ) does the job of the English "a/an" — it marks the noun as indefinite.',
+        },
+        {
+          heading: 'Asking "what?" and "who?"',
+          body: 'Use مَا هَذَا؟ ("what is this?") to ask about a thing, and مَنْ هَذَا؟ ("who is this?") to ask about a person. You answer with the same هَذَا + noun pattern, e.g. هَذَا قَلَمٌ ("this is a pen") or هَذَا رَجُلٌ ("this is a man").',
+        },
+        {
+          heading: 'Yes / no questions',
+          body: 'To turn a statement into a yes/no question, put the particle أَ at the very front: أَهَذَا بَيْتٌ؟ ("is this a house?"). Answer with نَعَمْ ("yes") or لا ("no"), e.g. لا، هَذَا قَلَمٌ ("no, this is a pen").',
+        },
+      ],
+      sentences: [
+        { ar: 'هَذَا بَيْتٌ.', translit: 'hādhā baytun', en: 'This is a house.' },
+        { ar: 'هَذَا مَسْجِدٌ.', translit: 'hādhā masjidun', en: 'This is a mosque.' },
+        { ar: 'هَذَا كِتَابٌ.', translit: 'hādhā kitābun', en: 'This is a book.' },
+        { ar: 'مَا هَذَا؟', translit: 'mā hādhā', en: 'What is this?' },
+        { ar: 'هَذَا نَجْمٌ.', translit: 'hādhā najmun', en: 'This is a star.' },
+        { ar: 'أَهَذَا بَيْتٌ؟', translit: 'a-hādhā baytun', en: 'Is this a house?' },
+        { ar: 'نَعَمْ، هَذَا بَيْتٌ.', translit: 'naʿam, hādhā baytun', en: 'Yes, this is a house.' },
+        { ar: 'لا، هَذَا قَلَمٌ.', translit: 'lā, hādhā qalamun', en: 'No, this is a pen.' },
+        { ar: 'مَنْ هَذَا؟', translit: 'man hādhā', en: 'Who is this?' },
+        { ar: 'هَذَا طَبِيبٌ.', translit: 'hādhā ṭabībun', en: 'This is a doctor.' },
+        { ar: 'هَذَا رَجُلٌ.', translit: 'hādhā rajulun', en: 'This is a man.' },
+        { ar: 'هَذَا وَلَدٌ.', translit: 'hādhā waladun', en: 'This is a boy.' },
+      ],
       vocab: [
         { ar: 'هَذَا', translit: 'hādhā', en: 'this (masc.)' },
         { ar: 'بَيْتٌ', translit: 'baytun', en: 'house' },
@@ -43,6 +71,28 @@ export const BOOK1 = {
       titleEnglish: 'Demonstrative for the far: ذَلِكَ (that)',
       grammar:
         'This lesson introduces ذَلِكَ ("that"), the demonstrative used to point to a singular masculine thing that is far away, contrasting with هَذَا ("this") for the near. Both are used in equational sentences, e.g. ذَلِكَ بَيْتٌ ("that is a house"). The lesson reinforces the indefinite tanwīn ending on the noun and the question word مَا.',
+      sections: [
+        {
+          heading: 'Pointing far with ذَلِكَ',
+          body: 'ذَلِكَ means "that". It is the partner of هَذَا: use هَذَا for something near you and ذَلِكَ for something further away. The sentence works exactly the same way — ذَلِكَ نَجْمٌ ("that is a star") — and you ask about it with مَا ذَلِكَ؟ ("what is that?").',
+        },
+        {
+          heading: 'Joining ideas with وَ ("and")',
+          body: 'وَ means "and" and is written joined to the word after it. It lets you contrast a near thing and a far thing in one sentence: هَذَا مَسْجِدٌ وَذَلِكَ بَيْتٌ ("this is a mosque and that is a house").',
+        },
+      ],
+      sentences: [
+        { ar: 'ذَلِكَ نَجْمٌ.', translit: 'dhālika najmun', en: 'That is a star.' },
+        { ar: 'مَا ذَلِكَ؟', translit: 'mā dhālika', en: 'What is that?' },
+        { ar: 'ذَلِكَ سَرِيرٌ.', translit: 'dhālika sarīrun', en: 'That is a bed.' },
+        { ar: 'ذَلِكَ حَجَرٌ.', translit: 'dhālika ḥajarun', en: 'That is a stone.' },
+        { ar: 'هَذَا مَسْجِدٌ وَذَلِكَ بَيْتٌ.', translit: 'hādhā masjidun wa-dhālika baytun', en: 'This is a mosque and that is a house.' },
+        { ar: 'هَذَا حِصَانٌ وَذَلِكَ حِمَارٌ.', translit: 'hādhā ḥiṣānun wa-dhālika ḥimārun', en: 'This is a horse and that is a donkey.' },
+        { ar: 'هَذَا سُكَّرٌ وَذَلِكَ لَبَنٌ.', translit: 'hādhā sukkarun wa-dhālika labanun', en: 'This is sugar and that is milk.' },
+        { ar: 'أَذَلِكَ كَلْبٌ؟', translit: 'a-dhālika kalbun', en: 'Is that a dog?' },
+        { ar: 'لا، ذَلِكَ قِطٌّ.', translit: 'lā, dhālika qiṭṭun', en: 'No, that is a cat.' },
+        { ar: 'هَذَا مُدَرِّسٌ وَذَلِكَ إِمَامٌ.', translit: 'hādhā mudarrisun wa-dhālika imāmun', en: 'This is a teacher and that is an imam.' },
+      ],
       vocab: [
         { ar: 'ذَلِكَ', translit: 'dhālika', en: 'that (masc.)' },
         { ar: 'نَجْمٌ', translit: 'najmun', en: 'star' },
@@ -64,6 +114,32 @@ export const BOOK1 = {
       titleEnglish: 'The definite article الـ and sun & moon letters',
       grammar:
         'This lesson teaches the definite article الـ ("the"), which makes a noun definite and removes its tanwīn (e.g. بَيْتٌ → الْبَيْتُ). The letters are divided into "moon letters" (الحُرُوفُ القَمَرِيَّةُ), after which the lām of الـ is pronounced clearly (الْقَمَرُ), and "sun letters" (الحُرُوفُ الشَّمْسِيَّةُ), after which the lām is silent and the following letter is doubled with a shaddah (الشَّمْسُ, pronounced ash-shams). A definite noun cannot take tanwīn.',
+      sections: [
+        {
+          heading: 'The definite article الـ ("the")',
+          body: 'Attaching الـ to the front of a noun makes it definite, like "the" in English. When you do, the noun loses its tanwīn (its "-un" ending): بَيْتٌ ("a house") becomes الْبَيْتُ ("the house"). A definite noun never carries tanwīn.',
+        },
+        {
+          heading: 'Moon letters — the lām is heard',
+          body: 'Fourteen letters are called moon letters (الحُرُوفُ القَمَرِيَّةُ). Before them the لـ of الـ is pronounced clearly, e.g. الْقَمَرُ (al-qamar, "the moon") and الْبَيْتُ (al-bayt). The word القمر ("the moon") gives this group its name.',
+        },
+        {
+          heading: 'Sun letters — the lām is silent',
+          body: 'The other fourteen are sun letters (الحُرُوفُ الشَّمْسِيَّةُ). Before them the لـ is not pronounced; instead the following letter is doubled with a shaddah. So الشَّمْسُ ("the sun") is written with a lām but pronounced ash-shams. Remember: this rule is about pronunciation, not spelling.',
+        },
+      ],
+      sentences: [
+        { ar: 'الْبَابُ مَفْتُوحٌ.', translit: 'al-bābu maftūḥun', en: 'The door is open.' },
+        { ar: 'الْقَلَمُ مَكْسُورٌ.', translit: 'al-qalamu maksūrun', en: 'The pen is broken.' },
+        { ar: 'الْكِتَابُ جَدِيدٌ.', translit: 'al-kitābu jadīdun', en: 'The book is new.' },
+        { ar: 'الْقَمَرُ جَمِيلٌ.', translit: 'al-qamaru jamīlun', en: 'The moon is beautiful.' },
+        { ar: 'الْمَاءُ بَارِدٌ.', translit: 'al-māʾu bāridun', en: 'The water is cold.' },
+        { ar: 'اللَّبَنُ حَارٌّ.', translit: 'al-labanu ḥārrun', en: 'The milk is hot.' },
+        { ar: 'الْوَلَدُ جَالِسٌ وَالْمُدَرِّسُ وَاقِفٌ.', translit: 'al-waladu jālisun wa-l-mudarrisu wāqifun', en: 'The boy is sitting and the teacher is standing.' },
+        { ar: 'الْحِمَارُ صَغِيرٌ وَالْحِصَانُ كَبِيرٌ.', translit: 'al-ḥimāru ṣaghīrun wa-l-ḥiṣānu kabīrun', en: 'The donkey is small and the horse is big.' },
+        { ar: 'الْحَجَرُ ثَقِيلٌ.', translit: 'al-ḥajaru thaqīlun', en: 'The stone is heavy.' },
+        { ar: 'الْمِنْدِيلُ وَسِخٌ.', translit: 'al-mindīlu wasikhun', en: 'The handkerchief is dirty.' },
+      ],
       vocab: [
         { ar: 'الْـ', translit: 'al-', en: 'the (definite article)' },
         { ar: 'الْقَمَرُ', translit: 'al-qamaru', en: 'the moon' },

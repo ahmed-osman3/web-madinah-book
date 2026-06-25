@@ -3,23 +3,29 @@
 A **free, offline, no-account** web app for learning and practicing
 *Durus al-Lughah al-ʿArabiyyah* (the Madinah Arabic course), **Book 1**.
 
-All 23 lessons, the vocabulary from every lesson, grammar notes, progress
-tracking, and **spaced-repetition flashcards** — all running entirely in your
-browser. Your progress is saved in `localStorage`; nothing is sent anywhere.
+All 23 lessons — each taught through grammar explanations and **worked example
+sentences**, then drilled Duolingo-style — plus progress tracking and
+**spaced-repetition revision**, all running entirely in your browser. Your
+progress is saved in `localStorage`; nothing is sent anywhere.
 
-> The Madinah Arabic books by Dr. V. Abdur Rahim are freely distributed for
-> teaching, so this content is copyright-free and safe to learn from and share.
+> The teaching content (grammar progression and example sentences) follows the
+> free [Madinah Arabic Language Course](https://www.madinaharabic.com/arabic-language-course/lessons/),
+> adapted into this app's own data: grammar explanations are rewritten in our
+> own words, and the example sentences are from the underlying (freely
+> distributed) *Durus al-Lughah* text by Dr. V. Abdur Rahim.
 
 ## Features
 
-- 📚 **All 23 lessons of Book 1** — each with a concise grammar explanation and
-  its full vocabulary list (Arabic with full ḥarakāt, transliteration, English).
-  Lesson topics mirror the free [Madinah Arabic Language Course](https://www.madinaharabic.com/arabic-language-course/lessons/).
-- 🎮 **Duolingo-style lessons** — each lesson *teaches* the grammar and new
-  words, then drills them with interactive exercises (multiple-choice both
-  directions, type-the-translation, and tap-the-pairs matching). Earn **XP**,
-  keep **hearts**, get instant ✓/✗ feedback, and finish with a celebration
-  screen and **daily-goal** progress.
+- 📚 **All 23 lessons of Book 1**, with the lesson sequence and topics following
+  the Madinah Arabic course. Each lesson has step-by-step **grammar sections**, a
+  set of **worked example sentences** (Arabic with full ḥarakāt, transliteration,
+  English), and its vocabulary list.
+- 🎮 **Duolingo-style lessons** — each lesson *teaches* the grammar, the new
+  words, and the example sentences, then drills them with interactive exercises:
+  multiple-choice (both directions), type-the-translation, tap-the-pairs
+  matching, **translate-the-sentence**, and **build-the-sentence** from a word
+  bank. Earn **XP**, keep **hearts**, get instant ✓/✗ feedback, and finish with a
+  celebration screen and **daily-goal** progress.
 - 🎧 **Audio** — the original Book 1 lesson recordings (Dr. V. Abdur Rahim, via
   the Internet Archive) play right inside each lesson, and every individual word
   has on-device pronunciation (Web Speech API) — so all vocabulary is voiced,
@@ -55,14 +61,18 @@ the app works as-is with no configuration.
 
 ## How study works
 
-- Open a **lesson** to read its grammar and browse the vocabulary, then hit
-  **Study this lesson** to drill its words, or use **Review** on the home screen
-  to study everything that's due across all lessons.
-- Each word is a flashcard (Arabic → meaning). After revealing the answer, rate
-  how well you knew it:
+- The **lesson** is the content core: open one to read its grammar sections and
+  example sentences, then hit **Start lesson** for the teach-then-practice
+  player. It teaches the rules, the new words, and the worked sentences, then
+  drills all of them with word and sentence exercises.
+- **Revision comes after.** Once you *finish* a lesson, its words **and**
+  sentences flow into the **spaced-repetition** review (the home-screen
+  **Review**). Lessons you haven't completed yet don't clutter your reviews.
+- Each review item is a flashcard (Arabic → meaning). After revealing the
+  answer, rate how well you knew it:
   - **Again** — forgot it; it comes back this session.
   - **Hard / Good / Easy** — schedules it further out the better you knew it.
-- New words are introduced up to your **daily limit** (default 15, change it in
+- New review items are introduced up to your **daily limit** (change it in
   **Settings**).
 
 ## Project structure
@@ -75,16 +85,23 @@ js/
   exercises.js      Builds the teach-then-practice exercise sequence
   srs.js            SM-2 spaced-repetition scheduling
   storage.js        localStorage persistence (load/save/export/import)
-  content.js        Derives flashcards from the course content
-  data/book1.js     Book 1 lessons, grammar notes, and vocabulary
+  content.js          Merges lesson content and derives word + sentence cards
+  data/book1.js       Book 1 lessons: titles, grammar notes, and vocabulary
+  data/book1_content.js  Adapted grammar sections + example sentences per lesson
 ```
 
 ## Extending it
 
-The content is plain data in `js/data/book1.js`. To add Book 2, create
-`js/data/book2.js` exporting the same shape and add it to the `BOOKS` array in
-`js/content.js` — the lessons, cards, and scheduling all pick it up automatically.
+The course content is plain data. `js/data/book1.js` holds each lesson's title,
+grammar note, and vocabulary; `js/data/book1_content.js` holds the adapted
+teaching **sections** and **example sentences** (and, for a few lessons whose
+original topic was inaccurate, title/grammar/vocab overrides realigned to the
+source course). The two are merged in `js/content.js` at load. To add Book 2,
+create `js/data/book2.js` exporting the same shape and add it to the `BOOKS`
+array — the lessons, cards, and scheduling all pick it up automatically.
 
 ## License
 
-App code: MIT. Course content is from the freely-distributed Madinah Arabic books.
+App code: MIT. The example sentences are from the freely-distributed *Durus
+al-Lughah* (Madinah Arabic) text; grammar explanations are this project's own
+adaptation of the topics taught in the free Madinah Arabic course.

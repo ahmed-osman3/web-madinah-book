@@ -20,7 +20,7 @@ import {
   getBook,
   getLesson,
   allCards,
-  lessonCards,
+  lessonItems,
   lessonAudioUrl,
 } from './content.js';
 import { buildLessonSteps, answerMatches } from './exercises.js';
@@ -93,9 +93,24 @@ function speakButton(text, extraClass = '') {
   }, '🔊');
 }
 
-// Categorise the whole deck relative to today.
+// The set of lesson numbers the learner has finished. SRS revision only draws
+// from completed lessons — "once we've finished a lesson we can revise it".
+function completedLessons() {
+  const ls = getState().lessons;
+  return new Set(
+    Object.keys(ls).filter((n) => ls[n]?.completed).map((n) => Number(n))
+  );
+}
+
+// All review items (words + sentences) belonging to completed lessons.
+function reviewableCards() {
+  const done = completedLessons();
+  return allCards().filter((c) => done.has(c.lesson));
+}
+
+// Categorise the review deck (completed lessons only) relative to today.
 function deckStatus() {
-  const cards = allCards();
+  const cards = reviewableCards();
   const settings = getState().settings;
   let due = 0;
   let newAvail = 0;
@@ -127,7 +142,7 @@ function newIntroducedToday() {
 }
 
 function lessonProgress(lessonNum) {
-  const cards = lessonCards(BOOK_NUM, lessonNum);
+  const cards = lessonItems(BOOK_NUM, lessonNum);
   if (!cards.length) return { total: 0, learned: 0, due: 0, pct: 0 };
   let learned = 0;
   let due = 0;
@@ -392,10 +407,8 @@ function renderLessonDetail(parts) {
       }, done ? '↻ Practice again' : '▶ Start lesson'),
     ),
     lessonAudioPanel(num),
-    el('div', { class: 'card panel' },
-      el('h2', {}, 'Grammar'),
-      el('p', { class: 'grammar ar-inline', dir: 'auto' }, lesson.grammar),
-    ),
+    ...grammarPanels(lesson),
+    sentencesPanel(lesson, showTranslit),
     vocabTable(lesson, showTranslit),
     el('div', { class: 'cta-row' },
       el('button', {
@@ -416,6 +429,45 @@ function renderLessonDetail(parts) {
       }, done ? 'Mark as not done' : 'Mark complete'),
     ),
   );
+}
+
+// Grammar panel(s): one card per adapted teaching section, or the legacy
+// single grammar paragraph for lessons not yet enriched.
+function grammarPanels(lesson) {
+  const sections = lesson.sections?.length
+    ? lesson.sections
+    : (lesson.grammar ? [{ heading: 'Grammar', body: lesson.grammar }] : []);
+  return sections.map((s) =>
+    el('div', { class: 'card panel' },
+      el('h2', {}, s.heading || 'Grammar'),
+      el('p', { class: 'grammar ar-inline', dir: 'auto', html: emphasizeArabic(s.body) }),
+    )
+  );
+}
+
+// Example-sentence table (the worked sentences that carry the lesson).
+function sentencesPanel(lesson, showTranslit) {
+  if (!lesson.sentences?.length) return null;
+  const panel = el('div', { class: 'card panel' },
+    el('div', { class: 'panel-head' }, el('h2', {}, `Example sentences (${lesson.sentences.length})`)),
+  );
+  const list = el('div', { class: 'sentence-list' });
+  lesson.sentences.forEach((s) => {
+    list.append(
+      el('div', { class: 'sentence-row' },
+        el('div', { class: 'sentence-ar-wrap' },
+          speakButton(s.ar, 'vocab-speak'),
+          el('div', { class: 'sentence-ar ar', dir: 'rtl' }, s.ar),
+        ),
+        el('div', { class: 'sentence-mid' },
+          (showTranslit && s.translit) ? el('div', { class: 'sentence-translit' }, s.translit) : null,
+          el('div', { class: 'sentence-en' }, s.en),
+        ),
+      )
+    );
+  });
+  panel.append(list);
+  return panel;
 }
 
 function vocabTable(lesson, showTranslit) {
@@ -454,8 +506,8 @@ function vocabTable(lesson, showTranslit) {
 function buildQueue(lessonNum) {
   const settings = getState().settings;
   const pool = lessonNum
-    ? lessonCards(BOOK_NUM, lessonNum)
-    : allCards();
+    ? lessonItems(BOOK_NUM, lessonNum)
+    : reviewableCards();
 
   const dueCards = [];
   const newCards = [];
@@ -540,9 +592,11 @@ function renderCard() {
 
   const progressPct = Math.round((s.index / s.total) * 100);
 
+  const isSentence = card.kind === 'sentence';
   const front = el('div', { class: 'flashcard-face flashcard-front' },
     isNewCard ? el('span', { class: 'chip chip-new card-flag' }, 'new') : null,
-    el('div', { class: 'flash-ar ar', dir: 'rtl' }, card.ar),
+    isSentence ? el('span', { class: 'chip chip-sentence card-flag right' }, 'sentence') : null,
+    el('div', { class: 'flash-ar ar' + (isSentence ? ' flash-sentence' : ''), dir: 'rtl' }, card.ar),
     speakButton(card.ar, 'speak-lg'),
   );
 
@@ -646,7 +700,7 @@ const XP_PER = 10;             // XP per correct exercise
 const START_HEARTS = 5;
 let lesson = null;             // active lesson-player session
 
-const EXERCISE_KINDS = new Set(['choose-en', 'choose-ar', 'type', 'match']);
+const EXERCISE_KINDS = new Set(['choose-en', 'choose-ar', 'type', 'match', 'translate', 'build']);
 const isExercise = (step) => EXERCISE_KINDS.has(step.kind);
 
 function renderLearn(parts) {
@@ -671,6 +725,7 @@ function renderLearn(parts) {
     selected: null,
     lastCorrect: null,
     match: null,
+    build: null,
   };
   renderStep();
 }
@@ -713,11 +768,14 @@ function renderStep() {
   const step = ls.steps[ls.index];
 
   let body, footer;
-  if (step.kind === 'grammar') { body = grammarBody(step); footer = teachFooter('Got it'); }
+  if (step.kind === 'rule') { body = ruleBody(step); footer = teachFooter(step.index + 1 >= step.count ? 'Got it' : 'Next'); }
   else if (step.kind === 'intro') { body = introBody(step); footer = teachFooter('Continue'); }
+  else if (step.kind === 'sentence-intro') { body = sentenceIntroBody(step); footer = teachFooter('Continue'); }
   else if (step.kind === 'choose-en') { body = chooseBody(step, 'en'); footer = exerciseFooter(step); }
   else if (step.kind === 'choose-ar') { body = chooseBody(step, 'ar'); footer = exerciseFooter(step); }
   else if (step.kind === 'type') { body = typeBody(step); footer = exerciseFooter(step); }
+  else if (step.kind === 'translate') { body = translateBody(step); footer = exerciseFooter(step); }
+  else if (step.kind === 'build') { body = buildBody(step); footer = buildFooter(step); }
   else if (step.kind === 'match') { body = matchBody(step); footer = matchFooter(step); }
 
   app.append(
@@ -731,22 +789,57 @@ function renderStep() {
 
 /* --- Teaching steps --- */
 
-function grammarBody(step) {
-  const showTranslit = getState().settings.showTransliteration;
-  const preview = el('div', { class: 'teach-vocab-preview' });
-  step.lesson.vocab.slice(0, 6).forEach((w) =>
-    preview.append(el('span', { class: 'teach-chip ar', dir: 'rtl' }, w.ar)));
-  return el('div', { class: 'teach' },
-    el('div', { class: 'teach-tag' }, `Lesson ${step.lesson.number}`),
-    el('h1', { class: 'teach-title ar', dir: 'rtl' }, step.lesson.titleArabic),
-    el('p', { class: 'teach-subtitle' }, step.lesson.titleEnglish),
+// A single teaching "rule" card. The first one in a lesson also shows the
+// lesson title, the original recording, and a preview of the new words.
+function ruleBody(step) {
+  const nodes = [];
+  if (step.first) {
+    nodes.push(
+      el('div', { class: 'teach-tag' }, `Lesson ${step.lesson.number}`),
+      el('h1', { class: 'teach-title ar', dir: 'rtl' }, step.lesson.titleArabic),
+      el('p', { class: 'teach-subtitle' }, step.lesson.titleEnglish),
+    );
+  }
+  nodes.push(
     el('div', { class: 'teach-grammar card panel' },
-      el('h2', {}, '📘 Grammar'),
-      el('p', { class: 'grammar', dir: 'auto' }, step.lesson.grammar),
+      el('h2', {}, (step.count > 1 ? `📘 ${step.index + 1}/${step.count} · ` : '📘 ') + (step.section.heading || 'Grammar')),
+      el('p', { class: 'grammar ar-inline', dir: 'auto', html: emphasizeArabic(step.section.body) }),
     ),
-    lessonAudioPanel(step.lesson.number, { compact: true }),
-    el('p', { class: 'muted small center' }, "You'll learn these words next:"),
-    preview,
+  );
+  if (step.first) {
+    const preview = el('div', { class: 'teach-vocab-preview' });
+    (step.lesson.vocab || []).slice(0, 6).forEach((w) =>
+      preview.append(el('span', { class: 'teach-chip ar', dir: 'rtl' }, w.ar)));
+    nodes.push(
+      lessonAudioPanel(step.lesson.number, { compact: true }),
+      step.lesson.vocab?.length ? el('p', { class: 'muted small center' }, "You'll learn these words next:") : null,
+      step.lesson.vocab?.length ? preview : null,
+    );
+  }
+  return el('div', { class: 'teach' }, ...nodes);
+}
+
+// Wrap inline Arabic runs so they render right-to-left within English prose.
+function emphasizeArabic(text) {
+  const esc = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc.replace(/([؀-ۿݐ-ݿ][؀-ۿݐ-ݿ\s.,؟،]*[؀-ۿݐ-ݿ])/g,
+    '<span class="ar-run" dir="rtl">$1</span>');
+}
+
+// Teach one worked example sentence (Arabic → English) with audio.
+function sentenceIntroBody(step) {
+  const s = step.sentence;
+  if (getState().settings.autoAudio) setTimeout(() => speak(s.ar), 180);
+  return el('div', { class: 'teach center' },
+    el('div', { class: 'teach-tag' }, 'Example sentence'),
+    el('div', { class: 'intro-ar-row' },
+      el('div', { class: 'intro-ar ar sentence', dir: 'rtl' }, s.ar),
+    ),
+    speakButton(s.ar, 'speak-lg'),
+    (s.translit && getState().settings.showTransliteration)
+      ? el('div', { class: 'intro-translit' }, s.translit) : null,
+    el('div', { class: 'intro-arrow' }, '↓'),
+    el('div', { class: 'intro-en' }, s.en),
   );
 }
 
@@ -861,7 +954,7 @@ function feedbackFooter(step) {
       el('div', {},
         el('div', { class: 'feedback-title' }, correct ? randomPraise() : 'Correct answer:'),
         correct ? null : el('div', { class: 'feedback-answer' },
-          step.kind === 'choose-ar'
+          (step.kind === 'choose-ar' || step.kind === 'build')
             ? el('span', { class: 'ar', dir: 'rtl' }, step.answer)
             : step.answer),
       ),
@@ -876,7 +969,7 @@ function randomPraise() { return PRAISES[Math.floor(Math.random() * PRAISES.leng
 function checkChoice(step) {
   const ls = lesson;
   if (ls.phase !== 'asking') return;
-  applyResult(step, ls.selected === step.answer, step.word);
+  applyResult(step, ls.selected === step.answer, step.word || step.sentence);
 }
 
 function checkType(step) {
@@ -896,6 +989,114 @@ function applyResult(step, correct, word) {
   ls.lastCorrect = correct;
   ls.phase = 'checked';
   renderStep();
+}
+
+/* --- Sentence: translate (multiple choice) --- */
+
+function translateBody(step) {
+  const ls = lesson;
+  const s = step.sentence;
+  const grid = el('div', { class: 'choice-grid' });
+  step.options.forEach((opt) => {
+    let cls = 'choice';
+    if (ls.phase === 'checked') {
+      if (opt === step.answer) cls += ' correct';
+      else if (opt === ls.selected) cls += ' wrong';
+    } else if (opt === ls.selected) cls += ' selected';
+    grid.append(
+      el('button', {
+        class: cls,
+        disabled: ls.phase === 'checked' ? '' : false,
+        onClick: () => { lesson.selected = opt; renderStep(); },
+      }, opt)
+    );
+  });
+  return el('div', { class: 'q' },
+    el('h2', { class: 'q-prompt' }, 'What does this mean?'),
+    el('div', { class: 'q-card' },
+      el('div', { class: 'q-word ar sentence', dir: 'rtl' }, s.ar),
+      speakButton(s.ar),
+      (s.translit && getState().settings.showTransliteration)
+        ? el('div', { class: 'q-translit' }, s.translit) : null,
+    ),
+    grid,
+  );
+}
+
+/* --- Sentence: build from a word bank (tap tiles in order) --- */
+
+function buildBody(step) {
+  const ls = lesson;
+  if (!ls.build) {
+    ls.build = { placed: [], bank: step.bank.map((t, i) => ({ t, key: i, used: false })) };
+  }
+  const b = ls.build;
+  const s = step.sentence;
+  const locked = ls.phase === 'checked';
+
+  const answer = el('div', { class: 'build-answer ar', dir: 'rtl' },
+    ...b.placed.map((tok, idx) =>
+      el('button', {
+        class: 'build-tile placed',
+        disabled: locked ? '' : false,
+        onClick: () => returnTile(idx),
+      }, tok.t)),
+    b.placed.length ? null : el('span', { class: 'build-placeholder muted' }, 'Tap the words in order →'),
+  );
+
+  const bank = el('div', { class: 'build-bank ar', dir: 'rtl' },
+    ...b.bank.map((tok) =>
+      el('button', {
+        class: 'build-tile' + (tok.used ? ' used' : ''),
+        disabled: (tok.used || locked) ? '' : false,
+        onClick: () => placeTile(tok.key),
+      }, tok.t)),
+  );
+
+  return el('div', { class: 'q' },
+    el('h2', { class: 'q-prompt' }, 'Build this in Arabic'),
+    el('div', { class: 'q-card' },
+      el('div', { class: 'q-word-en' }, s.en),
+    ),
+    el('div', { class: 'build-line' }, answer),
+    bank,
+  );
+}
+
+function placeTile(key) {
+  const b = lesson.build;
+  const tok = b.bank.find((x) => x.key === key);
+  if (!tok || tok.used) return;
+  tok.used = true;
+  b.placed.push(tok);
+  renderStep();
+}
+
+function returnTile(idx) {
+  const b = lesson.build;
+  const [tok] = b.placed.splice(idx, 1);
+  if (tok) tok.used = false;
+  renderStep();
+}
+
+function buildFooter(step) {
+  const ls = lesson;
+  if (ls.phase === 'checked') return feedbackFooter(step);
+  const canCheck = ls.build && ls.build.placed.length > 0;
+  return el('div', { class: 'learn-footer' },
+    el('button', {
+      class: 'btn-duo btn-duo-primary',
+      disabled: canCheck ? false : '',
+      onClick: () => checkBuild(step),
+    }, 'Check'),
+  );
+}
+
+function checkBuild(step) {
+  const ls = lesson;
+  if (ls.phase !== 'asking') return;
+  const got = (ls.build?.placed || []).map((t) => t.t).join(' ');
+  applyResult(step, got === step.answer, step.sentence);
 }
 
 /* --- Match exercise --- */
@@ -995,6 +1196,7 @@ function advance() {
   ls.phase = 'asking';
   ls.selected = null;
   ls.match = null;
+  ls.build = null;
   ls.lastCorrect = null;
 
   if (ls.hearts <= 0) return renderOutOfHearts();
@@ -1342,11 +1544,12 @@ function handleLearnKeys(e) {
     e.preventDefault();
     if (!isExercise(step) || ls.phase === 'checked') return advance();
     if (step.kind === 'type') return checkType(step);
+    if (step.kind === 'build') { if (ls.build?.placed.length) return checkBuild(step); return; }
     if (ls.selected != null) return checkChoice(step);
     return;
   }
   // Number keys pick a choice option.
-  if ((step.kind === 'choose-en' || step.kind === 'choose-ar') && ls.phase === 'asking') {
+  if ((step.kind === 'choose-en' || step.kind === 'choose-ar' || step.kind === 'translate') && ls.phase === 'asking') {
     const idx = parseInt(e.key, 10) - 1;
     if (idx >= 0 && idx < step.options.length) {
       e.preventDefault();
